@@ -1,0 +1,53 @@
+﻿@using PartTracker.Shared.Models;
+
+@inject HttpClient httpClient
+
+<h1>Add Part</h1>
+
+<EditForm Model="part" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+    <div class="form-group">
+        <label for="name">Title:</label>
+        <InputText id="name" class="form-control" @bind-Value="@part.Title" />
+        <ValidationMessage For="@(() => part.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <InputText id="name" class="form-control" @bind-Value="@part.Name" />
+        <ValidationMessage For="@(() => part.Name)" />
+    </div>
+    <div class="form-group">
+        <label for="name">Description:</label>
+        <InputText id="name" class="form-control" @bind-Value="@part.Description" />
+        <ValidationMessage For="@(() => part.Description)" />
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+</EditForm>
+
+@if (isFormSubmitted)
+{
+    <div class="alert alert-success mt-3">
+        Form submitted successfully!
+    </div>
+}
+
+@code {
+    private bool isFormSubmitted = false;
+    private Part part = new Part();
+    private async Task HandleSubmit()
+    {
+        isFormSubmitted = true;
+        var response = await httpClient.PostAsJsonAsync("api/parts/save", part);
+        if (response.IsSuccessStatusCode)
+        {
+            part = new Part();
+        }
+        else
+        {
+            Console.Write("bad");
+        }
+    }
+}

@@ -1,0 +1,127 @@
+﻿@using PartTracker.Shared.Models;
+@inject HttpClient httpClient
+
+<h3>PartTable</h3>
+@if (parts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Title</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in parts)
+            {
+                <tr>
+                    <td>@forecast.Created.ToShortDateString()</td>
+                    <td>@forecast.Title</td>
+                    <td>@forecast.Name</td>
+                    <td>@forecast.Description</td>
+                    <td>@forecast.Updated</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination">
+        <button class="btn btn-link" disabled="@IsFirstPage" @onclick="GoToFirstPage">First</button>
+        <button class="btn btn-link" disabled="@IsFirstPage" @onclick="GoToPreviousPage">Previous</button>
+        <span>Page @currentPage of @totalPages</span>
+        <button class="btn btn-link" disabled="@IsLastPage" @onclick="GoToNextPage">Next</button>
+        <button class="btn btn-link" disabled="@IsLastPage" @onclick="GoToLastPage">Last</button>
+    </div>
+}
+@code {
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalItems;
+    private int totalPages;
+
+    private bool IsFirstPage => currentPage == 1;
+    private bool IsLastPage => currentPage == totalPages;
+
+    private IEnumerable<Part>? parts;
+    private string? sortByColumn;
+    private bool sortAscending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SortBy(nameof(Part.Title));
+    }
+
+    private async Task SortBy(string column)
+    {
+        if (sortByColumn == column)
+        {
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortByColumn = column;
+            sortAscending = true;
+        }
+
+        currentPage = 1; // Reset to first page when sorting
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var response = await httpClient.GetAsync($"api/parts?sortBy={sortByColumn}&sortAscending={sortAscending}&page={currentPage}&pageSize={pageSize}");
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            var result = await response.Content.ReadFromJsonAsync<PaginatedResult<Part>>();
+            parts = result?.Items ?? Enumerable.Empty<Part>();
+            totalItems = result?.TotalItems ?? 0;
+            totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+
+
+    private async Task GoToFirstPage()
+    {
+        currentPage = 1;
+        await LoadData();
+    }
+
+    private async Task GoToPreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadData();
+        }
+    }
+
+    private async Task GoToNextPage()
+    {
+        if (!IsLastPage)
+        {
+            currentPage++;
+            await LoadData();
+        }
+    }
+
+    private async Task GoToLastPage()
+    {
+        if (!IsLastPage)
+        {
+            currentPage = totalPages;
+            await LoadData();
+        }
+    }
+}
