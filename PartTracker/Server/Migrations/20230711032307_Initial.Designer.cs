@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PartTracker.Server.Data;
 
@@ -10,9 +11,11 @@ using PartTracker.Server.Data;
 namespace PartTracker.Server.Migrations
 {
     [DbContext(typeof(PartTrackerContext))]
-    partial class PartTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20230711032307_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.8");

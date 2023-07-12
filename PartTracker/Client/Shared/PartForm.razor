@@ -20,9 +20,9 @@
         <ValidationMessage For="@(() => part.Name)" />
     </div>
     <div class="form-group">
-        <label for="name">Description:</label>
-        <InputText id="name" class="form-control" @bind-Value="@part.Description" />
-        <ValidationMessage For="@(() => part.Description)" />
+        <label for="name">Notes:</label>
+        <InputTextArea id="name" class="form-control form-text" @bind-Value="@part.Notes" />
+        <ValidationMessage For="@(() => part.Notes)" />
     </div>
     <button type="submit" class="btn btn-primary btn-sm">Submit</button>
 </EditForm>
@@ -40,7 +40,7 @@
     private async Task HandleSubmit()
     {
         isFormSubmitted = true;
-        var response = await httpClient.PostAsJsonAsync("api/parts/save", part);
+        var response = await httpClient.PostAsJsonAsync("api/Part", part);
         if (response.IsSuccessStatusCode)
         {
             part = new Part();
